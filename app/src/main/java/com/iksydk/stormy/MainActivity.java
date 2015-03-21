@@ -80,7 +80,7 @@ public class MainActivity extends ActionBarActivity
 
     private void getForecast(double latitude, double longitude)
     {
-        String apiKey = "c18b93b71ce3dd7cb4b0c2504635fa23";
+        String apiKey = getApiKey();
 
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey + "/" + latitude + "," + longitude;
 
@@ -162,6 +162,28 @@ public class MainActivity extends ActionBarActivity
             Toast.makeText(this, getString(R.string.network_unavailable_message), Toast.LENGTH_LONG)
                     .show();
         }
+    }
+
+    private String getApiKey()
+    {
+        String apiKey;
+
+        if(getApplicationContext().getResources()
+                .getIdentifier("protected_forecast_io_api_key", "string", getPackageName()) == 0)
+        {
+            apiKey = getString(R.string.forecast_io_api_key);
+            Log.v(TAG, "Unprotected api key used");
+        }
+        else
+        {
+            apiKey = getString(getApplicationContext().getResources()
+                    .getIdentifier("protected_forecast_io_api_key", "string", getPackageName()));
+            Log.v(TAG, "Protected api key used");
+        }
+
+        Log.v(TAG, "ApiKey value: " + apiKey);
+
+        return apiKey;
     }
 
     private void toggleRefresh()
