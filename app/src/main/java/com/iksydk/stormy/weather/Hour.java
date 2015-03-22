@@ -3,6 +3,9 @@ package com.iksydk.stormy.weather;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by Billy on 3/21/2015.
  */
@@ -62,9 +65,9 @@ public class Hour implements Parcelable
         mSummary = summary;
     }
 
-    public double getTemperature()
+    public int getTemperature()
     {
-        return mTemperature;
+        return (int) Math.round(mTemperature);
     }
 
     public void setTemperature(double temperature)
@@ -80,6 +83,11 @@ public class Hour implements Parcelable
     public void setIcon(String icon)
     {
         mIcon = icon;
+    }
+
+    public int getIconId()
+    {
+        return Forecast.getIconId(mIcon);
     }
 
     public String getTimezone()
@@ -106,5 +114,13 @@ public class Hour implements Parcelable
         dest.writeDouble(mTemperature);
         dest.writeString(mIcon);
         dest.writeString(mTimezone);
+    }
+
+    public String getHour()
+    {
+        SimpleDateFormat formatter = new SimpleDateFormat("h a");
+        Date date = new Date(mTime * 1000);
+
+        return formatter.format(date);
     }
 }
