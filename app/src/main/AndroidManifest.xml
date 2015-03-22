@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.iksydk.stormy">
+<manifest
+    package="com.iksydk.stormy"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -23,6 +24,14 @@
         <activity
             android:name=".ui.DailyForecastActivity"
             android:label="@string/title_activity_daily_forecast"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.iksydk.stormy.ui.MainActivity"/>
+        </activity>
+        <activity
+            android:name=".ui.HourlyForecastActivity"
+            android:label="@string/title_activity_hourly_forecast"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
