@@ -1,10 +1,12 @@
-package com.iksydk.stormy;
+package com.iksydk.stormy.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
+
+import com.iksydk.stormy.R;
 
 /**
  * Created by Billy on 3/21/2015.
