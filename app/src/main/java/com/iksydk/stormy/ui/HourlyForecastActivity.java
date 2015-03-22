@@ -18,7 +18,7 @@ import butterknife.InjectView;
 
 public class HourlyForecastActivity extends ActionBarActivity
 {
-
+    //
     @InjectView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     private Hour[] mHours;
