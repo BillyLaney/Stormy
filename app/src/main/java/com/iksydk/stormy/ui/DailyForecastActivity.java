@@ -47,13 +47,13 @@ public class DailyForecastActivity extends Activity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 String dayOfTheWeek = mDays[position].getDayOfTheWeek();
-                String considtions = mDays[position].getSummary();
+                String conditions = mDays[position].getSummary();
                 String highTemp = mDays[position].getTemperatureMax() + "";
 
                 String message = String.format("On %s the high will be %s and it will be %s",
                         dayOfTheWeek,
                         highTemp,
-                        considtions);
+                        conditions);
                 Toast.makeText(DailyForecastActivity.this, message, Toast.LENGTH_LONG)
                         .show();
             }
