@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
-    private static final String HOURLY_FORECAST = "HOURLY_FORECAST";
+    public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
 
     @InjectView(R.id.timeLabel)
     TextView mTimeLabel;
