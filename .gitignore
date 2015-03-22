@@ -5,4 +5,3 @@
 .DS_Store
 /build
 /app/src/main/res/values/protectedStrings.xml
-.idea/codeStyleSettings.xml

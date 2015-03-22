@@ -346,7 +346,7 @@ public class MainActivity extends ActionBarActivity
     @OnClick(R.id.hourlyButton)
     public void startHourlyActivity(View view)
     {
-        Intent intent = new Intent(this, hourlyForecastActivity.class);
+        Intent intent = new Intent(this, HourlyForecastActivity.class);
 
         intent.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
 
