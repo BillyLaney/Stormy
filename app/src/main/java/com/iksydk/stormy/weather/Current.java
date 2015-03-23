@@ -16,6 +16,7 @@ public class Current
     private double mPrecipitationChance;
     private String mSummary;
     private String mTimeZone;
+    private String mCityState;
 
     public String getIcon()
     {
@@ -98,5 +99,15 @@ public class Current
     public void setTimeZone(String timeZone)
     {
         mTimeZone = timeZone;
+    }
+
+    public String getCityState()
+    {
+        return mCityState;
+    }
+
+    public void setCityState(String cityState)
+    {
+        mCityState = cityState;
     }
 }
