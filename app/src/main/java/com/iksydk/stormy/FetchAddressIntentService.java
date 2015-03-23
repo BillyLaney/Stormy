@@ -142,9 +142,9 @@ public class FetchAddressIntentService extends IntentService
             // getCountryCode() ("US", for example)
             // getCountryName() ("United States", for example)
 
-            addressFragments.add(address.getLocality() + ", " + address.getCountryCode());
+            addressFragments.add(address.getLocality() + " " + address.getAdminArea() + ", " + address.getCountryCode());
 
-            Log.i(TAG, getString(R.string.address_found));
+            Log.v(TAG, getString(R.string.address_found));
             deliverResultToReceiver(Constants.SUCCESS_RESULT,
                     TextUtils.join(System.getProperty("line.separator"), addressFragments));
         }

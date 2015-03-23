@@ -21,11 +21,11 @@ import butterknife.InjectView;
 
 public class DailyForecastActivity extends Activity
 {
-    @InjectView(android.R.id.list)
-    ListView mListView;
-    @InjectView(android.R.id.empty)
-    TextView mEmptyTextView;
+    @InjectView(android.R.id.list) ListView mListView;
+    @InjectView(android.R.id.empty) TextView mEmptyTextView;
+    @InjectView(R.id.locationLabel) TextView mLocationLabel;
     private Day[] mDays;
+    private String mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,6 +37,8 @@ public class DailyForecastActivity extends Activity
         Intent intent = getIntent();
         Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.DAILY_FORECAST);
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
+
+        mLocation = intent.getStringExtra(MainActivity.CURRENT_LOCATION);
 
         DayAdapter adapter = new DayAdapter(this, mDays);
         mListView.setAdapter(adapter);
@@ -58,5 +60,7 @@ public class DailyForecastActivity extends Activity
                         .show();
             }
         });
+
+        mLocationLabel.setText(mLocation);
     }
 }

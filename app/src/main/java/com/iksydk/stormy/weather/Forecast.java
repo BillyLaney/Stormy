@@ -9,6 +9,7 @@ public class Forecast
 {
     private Current mCurrent;
     private Hour[] mHourlyForecast;
+    private String mLocation;
 
     public Day[] getDailyForecast()
     {
@@ -88,5 +89,15 @@ public class Forecast
         }
 
         return iconId;
+    }
+
+    public String getLocation()
+    {
+        return mLocation;
+    }
+
+    public void setLocation(String location)
+    {
+        mLocation = location;
     }
 }

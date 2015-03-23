@@ -54,14 +54,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
     public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
+    public static final String CURRENT_LOCATION = "CURRENT_LOCATION";
+
     public static final int LOCATION_UPDATES_SLOW = 1000 * 60; //60 seconds
     public static final int LOCATION_UPDATES_FAST = 0; //0 milliseconds
     public static final int LOCATION_UPDATES_MINIMUM_DISTANCE = 50;//meters
 
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
+
     protected Location mLastLocation;
-    protected String mLastKnownCityState;
+
     @InjectView(R.id.timeLabel)
     TextView mTimeLabel;
     @InjectView(R.id.temperatureLabel)
@@ -84,13 +87,18 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private AddressResultReceiver mResultReceiver;
     private GoogleApiClient mGoogleApiClient;
     private LocationManager mLocationManager;
+    private String mLastLocationCityState;
+    private boolean mUserRequestedRefresh = true;
+    private boolean mHasLatestCityState = false;
+    private boolean mFirstLoad = true;
 
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
-        mProgressBar.setVisibility(View.INVISIBLE);
+
+        toggleRefresh(true); //we do an update at the beginning by force so start the refresh indicator
 
         // Acquire a reference to the system Location Manager
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -98,17 +106,14 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         mLastLocation = getBestLastKnownLocation();
 
-        if(mLastLocation != null)
-        {
-            startReverseGeocodeIntentService();
-        }
-        else
+        if(mLastLocation == null)
         {
             mLastLocation = new Location("MOCK");
             mLastLocation.setLongitude(-122.423);
             mLastLocation.setLatitude(37.8267);
 
-            mLastKnownCityState = "Alcatraz Island, CA";
+            mLastLocationCityState = "Alcatraz Island CA, US";
+            mHasLatestCityState = true;
         }
 
 
@@ -118,6 +123,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v)
             {
+                Log.v(TAG, "Refresh button click");
+                mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
+                toggleRefresh(true);
                 getForecast(mLastLocation);
             }
         });
@@ -142,11 +150,19 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 Log.v(TAG, "Location returned: " + location.getProvider());
                 if(isBetterLocation(location, mLastLocation))
                 {
-                    Log.v(TAG, "found better location");
-                    //makeUseOfNewLocation(location);
+                    Log.v(TAG, "Location returned is better location");
 
                     mLastLocation = location;
-                    startReverseGeocodeIntentService();
+                    mHasLatestCityState = false; //reset the city state as we have a new location
+                    if(mUserRequestedRefresh)
+                    {
+                        //only if it just happens to be that the user has requested a refresh
+                        // and we have a better location now we should start the reverse geocoding service
+                        //this will only happen if we get a new location between the time the user clicks, but before the api has returned.
+                        //it might save the user whole milliseconds at some point
+                        Log.v(TAG, "Location Received, Is Better, and User requested a refresh, SAVE THE MILLISECONDS!!");
+                        startReverseGeocodeIntentService();
+                    }
                 }
 
             }
@@ -166,8 +182,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         // Register the listener with the Location Manager to receive location updates
         //Call twice to receive updates from both NETWORK (cell network and wifi) and GPS
-        //TODO: set the listeners to a reasonable time/distance setting.
-        //TODO: set the listeners to a faster time for a short duration when the refresh button is pressed
         if(mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_UPDATES_SLOW, LOCATION_UPDATES_MINIMUM_DISTANCE, locationListener); //Cell network based location (android.permission.ACCESS_COARSE_LOCATION)
@@ -191,14 +205,13 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     private void getForecast(Location location)
     {
+        Log.v(TAG, "getForecast called");
         String apiKey = getApiKey();
 
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey + "/" + location.getLatitude() + "," + location.getLongitude();
 
         if(isNetworkAvailable())
         {
-            toggleRefresh();
-
             OkHttpClient client = new OkHttpClient();
 
             Request request = new Request.Builder()
@@ -216,7 +229,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                         @Override
                         public void run()
                         {
-                            toggleRefresh();
+                            toggleRefresh(false);
                         }
                     });
 
@@ -226,15 +239,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 @Override
                 public void onResponse(Response response) throws IOException
                 {
-                    runOnUiThread(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            toggleRefresh();
-                        }
-                    });
-
                     try
                     {
                         String jsonData = response.body()
@@ -244,15 +248,44 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                         if(response.isSuccessful())
                         {
                             mForecast = parseForecastDetails(jsonData);
-                            //TODO: update forecast object with citystate here
-                            runOnUiThread(new Runnable()
+
+                            if(!mHasLatestCityState)
                             {
-                                @Override
-                                public void run()
+                                //if we get here it means that we received new location details between the last refresh
+                                startReverseGeocodeIntentService();
+                            }
+                            else
+                            {
+                                mForecast.setLocation(mLastLocationCityState);
+                            }
+                            //We only update the display once we have a city and state to go with it.
+                            //this will prevent updating the temp but not the city together
+                            if(mHasLatestCityState)
+                            {
+                                Log.v(TAG, "We have the latest city, updating display");
+                                runOnUiThread(new Runnable()
                                 {
-                                    updateDisplay();
-                                }
-                            });
+                                    @Override
+                                    public void run()
+                                    {
+                                        updateDisplay();
+                                    }
+                                });
+                            }
+
+//                            //This is mainly for those without google play services and emulator it will at least show defaults
+//                            //even if it can't get subsequent results for the address through geocoder.
+//                            if(mForecast.getLocation() == null)
+//                            {
+//                                runOnUiThread(new Runnable()
+//                                {
+//                                    @Override
+//                                    public void run()
+//                                    {
+//                                        updateDisplay();
+//                                    }
+//                                });
+//                            }
 
                         }
                         else
@@ -300,9 +333,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         return apiKey;
     }
 
-    private void toggleRefresh()
+    private void toggleRefresh(boolean turnRefreshIndicatorOn)
     {
-        if(mProgressBar.getVisibility() == View.INVISIBLE)
+        if(turnRefreshIndicatorOn)
         {
             mProgressBar.setVisibility(View.VISIBLE);
             mRefreshImageView.setVisibility(View.INVISIBLE);
@@ -316,6 +349,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     private void updateDisplay()
     {
+        Log.v(TAG, "Updating display");
         Current current = mForecast.getCurrent();
 
         mTemperatureLabel.setText(current.getTemperature() + "");
@@ -324,11 +358,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mPrecipValue.setText(current.getPrecipitationChance() + "%");
         mSummaryLabel.setText(current.getSummary());
         mLocationLabel.setText(current.getCityState());
-        //TODO: remove this and replace with update to the forecast object
-        mLocationLabel.setText(mLastKnownCityState);
+        mLocationLabel.setText(mForecast.getLocation());
 
         Drawable drawable = getResources().getDrawable(current.getIconId());
         mIconImageView.setImageDrawable(drawable);
+
+        toggleRefresh(false);
+
+        if(mUserRequestedRefresh)
+        {
+            mUserRequestedRefresh = false; //we have completed a user requested refresh
+        }
     }
 
     private Forecast parseForecastDetails(String jsonData) throws JSONException
@@ -401,7 +441,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     {
         JSONObject forecast = new JSONObject(jsonData);
         String timezone = forecast.getString("timezone");
-        Log.i(TAG, "From JSON: " + timezone);
+        Log.v(TAG, "From JSON: " + timezone);
 
         JSONObject currently = forecast.getJSONObject("currently");
 
@@ -446,6 +486,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         Intent intent = new Intent(this, DailyForecastActivity.class);
 
         intent.putExtra(DAILY_FORECAST, mForecast.getDailyForecast());
+        intent.putExtra(CURRENT_LOCATION, mForecast.getLocation());
 
         startActivity(intent);
     }
@@ -472,15 +513,8 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                         .show();
                 return;
             }
-            // It is possible that the user presses the button to get the address before the
-            // GoogleApiClient object successfully connects. In such a case, mAddressRequested
-            // is set to true, but no attempt is made to fetch the address (see
-            // fetchAddressButtonHandler()) . Instead, we start the intent service here if the
-            // user has requested an address, since we now have a connection to GoogleApiClient.
-            if(true)
-            {
-                startReverseGeocodeIntentService();
-            }
+
+            startReverseGeocodeIntentService();
         }
     }
 
@@ -530,6 +564,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     protected void startReverseGeocodeIntentService()
     {
+        Log.v(TAG, "Reverse geocoding requested");
         // Create an intent for passing to the intent service responsible for fetching the address.
         Intent intent = new Intent(this, FetchAddressIntentService.class);
 
@@ -650,7 +685,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData)
         {
-
+            Log.v(TAG, "AddressResultReceiver receive results");
             // Display the address string or an error message sent from the intent service.
             String result = resultData.getString(Constants.RESULT_DATA_KEY);
             //displayAddressOutput();
@@ -658,8 +693,28 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             // Show a toast message if an address was found.
             if(resultCode == Constants.SUCCESS_RESULT)
             {
-                Log.v(TAG, "AddressResultReceiver success");
-                mLastKnownCityState = result;
+                Log.v(TAG, "AddressResultReceiver reverse geocoded successfully");
+                mLastLocationCityState = result;
+                mHasLatestCityState = true; //update saying for the latest gps we have the updated the latest city state
+
+                //this method gets called each time we get better gps, but we only want to update the forecast and UI if the user requested a new forecast
+                if(mUserRequestedRefresh && mForecast != null)
+                {
+                    mForecast.setLocation(mLastLocationCityState);
+                    Log.v(TAG, "User requested update and we received a geocode response, updating display");
+                    runOnUiThread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            updateDisplay();
+                        }
+                    });
+                }
+            }
+            else
+            {
+                //we received some kind of error
             }
         }
     }
