@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.iksydk.stormy.Constants;
@@ -53,6 +54,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
     public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
+    public static final int LOCATION_UPDATES_SLOW = 1000 * 60; //60 seconds
+    public static final int LOCATION_UPDATES_FAST = 0; //0 milliseconds
+    public static final int LOCATION_UPDATES_MINIMUM_DISTANCE = 50;//meters
+
+
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     protected Location mLastLocation;
     protected String mLastKnownCityState;
@@ -96,6 +102,14 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         {
             startReverseGeocodeIntentService();
         }
+        else
+        {
+            mLastLocation = new Location("MOCK");
+            mLastLocation.setLongitude(-122.423);
+            mLastLocation.setLatitude(37.8267);
+
+            mLastKnownCityState = "Alcatraz Island, CA";
+        }
 
 
 
@@ -124,8 +138,8 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         {
             public void onLocationChanged(Location location)
             {
-                // Called when a new location is found by the network location provider.
-
+                // Called when a new location is found by the location provider.
+                Log.v(TAG, "Location returned: " + location.getProvider());
                 if(isBetterLocation(location, mLastLocation))
                 {
                     Log.v(TAG, "found better location");
@@ -156,11 +170,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         //TODO: set the listeners to a faster time for a short duration when the refresh button is pressed
         if(mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         {
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener); //Cell network based location (android.permission.ACCESS_COARSE_LOCATION)
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_UPDATES_SLOW, LOCATION_UPDATES_MINIMUM_DISTANCE, locationListener); //Cell network based location (android.permission.ACCESS_COARSE_LOCATION)
         }
         if(mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
         {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener); //GPS based location (android.permission.ACCESS_FINE_LOCATION)
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_UPDATES_SLOW, LOCATION_UPDATES_MINIMUM_DISTANCE, locationListener); //GPS based location (android.permission.ACCESS_FINE_LOCATION)
         }
     }
 
@@ -481,10 +495,14 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     {
         // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
         // onConnectionFailed.
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
-        if(connectionResult.getErrorCode() == ConnectionResult.API_UNAVAILABLE)
+        int errorCode = connectionResult.getErrorCode();
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + errorCode);
+        switch(errorCode)
         {
-            Log.e(TAG, "GoogleApiClient API_UNAVAILABLE");
+            case ConnectionResult.SERVICE_MISSING:
+            case ConnectionResult.SERVICE_DISABLED:
+            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
+                GooglePlayServicesUtil.getErrorDialog(errorCode,this,1).show();
         }
     }
 
