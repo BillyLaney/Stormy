@@ -15,6 +15,7 @@ import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,9 +76,8 @@ public class WeatherFragment extends Fragment implements GoogleApiClient.Connect
     @InjectView(R.id.precipValue) TextView mPrecipValue;
     @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
     @InjectView(R.id.iconImageView) ImageView mIconImageView;
-    @InjectView(R.id.refreshImageView) ImageView mRefreshImageView;
-    @InjectView(R.id.progressBar) ProgressBar mProgressBar;
     @InjectView(R.id.locationLabel) TextView mLocationLabel;
+    @InjectView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Forecast mForecast;
     private AddressResultReceiver mResultReceiver;
@@ -93,6 +93,11 @@ public class WeatherFragment extends Fragment implements GoogleApiClient.Connect
         View rootView = inflater.inflate(R.layout.fragment_weather,
                 container, false);
         ButterKnife.inject(this, rootView);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout)rootView.findViewById(R.id.swipeRefreshLayout);
+
+        mSwipeRefreshLayout.setOnRefreshListener(getRefreshListener());
+        //mSwipeRefreshLayout.setColorSchemeColors(R.color.swipeRefresh1, R.color.swipeRefresh2, R.color.swipeRefresh3, R.color.swipeRefresh4);
 
         toggleRefresh(true); //we do an update at the beginning by force so start the refresh indicator
 
@@ -112,19 +117,6 @@ public class WeatherFragment extends Fragment implements GoogleApiClient.Connect
             mHasLatestCityState = true;
         }
 
-
-        mRefreshImageView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Log.v(TAG, "Refresh button click");
-                mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
-                toggleRefresh(true);
-                getForecast(mLastLocation);
-            }
-        });
-
         getForecast(mLastLocation);
 
         Log.d(TAG, "Main UI code is running!");
@@ -134,6 +126,20 @@ public class WeatherFragment extends Fragment implements GoogleApiClient.Connect
         startLocationListener();
 
         return rootView;
+    }
+
+    private SwipeRefreshLayout.OnRefreshListener getRefreshListener()
+    {
+        return new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                Log.v(TAG, "Refresh swipe action");
+                mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
+                getForecast(mLastLocation);
+            }
+        };
     }
 
     private void startLocationListener()
@@ -334,13 +340,11 @@ public class WeatherFragment extends Fragment implements GoogleApiClient.Connect
     {
         if(turnRefreshIndicatorOn)
         {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRefreshImageView.setVisibility(View.INVISIBLE);
+            mSwipeRefreshLayout.setRefreshing(true);
         }
         else
         {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            mRefreshImageView.setVisibility(View.VISIBLE);
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 
