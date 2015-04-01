@@ -57,7 +57,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     public static final String CURRENT_LOCATION = "CURRENT_LOCATION";
 
     public static final int LOCATION_UPDATES_SLOW = 1000 * 60; //60 seconds
-    public static final int LOCATION_UPDATES_FAST = 0; //0 milliseconds
     public static final int LOCATION_UPDATES_MINIMUM_DISTANCE = 50;//meters
 
 
