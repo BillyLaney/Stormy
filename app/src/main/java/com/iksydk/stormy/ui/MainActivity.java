@@ -65,24 +65,16 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     protected Location mLastLocation;
 
-    @InjectView(R.id.timeLabel)
-    TextView mTimeLabel;
-    @InjectView(R.id.temperatureLabel)
-    TextView mTemperatureLabel;
-    @InjectView(R.id.humidityValue)
-    TextView mHumidityValue;
-    @InjectView(R.id.precipValue)
-    TextView mPrecipValue;
-    @InjectView(R.id.summaryLabel)
-    TextView mSummaryLabel;
-    @InjectView(R.id.iconImageView)
-    ImageView mIconImageView;
-    @InjectView(R.id.refreshImageView)
-    ImageView mRefreshImageView;
-    @InjectView(R.id.progressBar)
-    ProgressBar mProgressBar;
-    @InjectView(R.id.locationLabel)
-    TextView mLocationLabel;
+    @InjectView(R.id.timeLabel) TextView mTimeLabel;
+    @InjectView(R.id.temperatureLabel) TextView mTemperatureLabel;
+    @InjectView(R.id.humidityValue) TextView mHumidityValue;
+    @InjectView(R.id.precipValue) TextView mPrecipValue;
+    @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
+    @InjectView(R.id.iconImageView) ImageView mIconImageView;
+    @InjectView(R.id.refreshImageView) ImageView mRefreshImageView;
+    @InjectView(R.id.progressBar) ProgressBar mProgressBar;
+    @InjectView(R.id.locationLabel) TextView mLocationLabel;
+
     private Forecast mForecast;
     private AddressResultReceiver mResultReceiver;
     private GoogleApiClient mGoogleApiClient;
@@ -115,7 +107,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             mLastLocationCityState = "Alcatraz Island CA, US";
             mHasLatestCityState = true;
         }
-
 
 
         mRefreshImageView.setOnClickListener(new View.OnClickListener()
@@ -536,7 +527,8 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             case ConnectionResult.SERVICE_MISSING:
             case ConnectionResult.SERVICE_DISABLED:
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                GooglePlayServicesUtil.getErrorDialog(errorCode,this,1).show();
+                GooglePlayServicesUtil.getErrorDialog(errorCode, this, 1)
+                        .show();
         }
     }
 
