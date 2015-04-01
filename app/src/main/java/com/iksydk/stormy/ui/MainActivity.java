@@ -81,6 +81,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private String mLastLocationCityState;
     private boolean mUserRequestedRefresh = true;
     private boolean mHasLatestCityState = false;
+    private boolean mAlertAboutGooglePlayServices = true;
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -525,8 +526,12 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             case ConnectionResult.SERVICE_MISSING:
             case ConnectionResult.SERVICE_DISABLED:
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                GooglePlayServicesUtil.getErrorDialog(errorCode, this, 1)
-                        .show();
+                if(mAlertAboutGooglePlayServices)
+                {
+                    GooglePlayServicesUtil.getErrorDialog(errorCode, this, 1)
+                            .show();
+                    mAlertAboutGooglePlayServices = false;//alert only once per run
+                }
         }
     }
 
