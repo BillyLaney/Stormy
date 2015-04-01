@@ -30,7 +30,7 @@ public class HourlyForecastActivity extends ActionBarActivity
         ButterKnife.inject(this);
 
         Intent intent = getIntent();
-        Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.HOURLY_FORECAST);
+        Parcelable[] parcelables = intent.getParcelableArrayExtra(WeatherFragment.HOURLY_FORECAST);
 
         mHours = Arrays.copyOf(parcelables, parcelables.length, Hour[].class);
 

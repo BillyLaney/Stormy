@@ -35,10 +35,10 @@ public class DailyForecastActivity extends Activity
         ButterKnife.inject(this);
 
         Intent intent = getIntent();
-        Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.DAILY_FORECAST);
+        Parcelable[] parcelables = intent.getParcelableArrayExtra(WeatherFragment.DAILY_FORECAST);
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
 
-        mLocation = intent.getStringExtra(MainActivity.CURRENT_LOCATION);
+        mLocation = intent.getStringExtra(WeatherFragment.CURRENT_LOCATION);
 
         DayAdapter adapter = new DayAdapter(this, mDays);
         mListView.setAdapter(adapter);
