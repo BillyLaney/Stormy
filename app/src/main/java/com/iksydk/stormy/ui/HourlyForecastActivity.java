@@ -1,5 +1,6 @@
 package com.iksydk.stormy.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class HourlyForecastActivity extends ActionBarActivity
+public class HourlyForecastActivity extends Activity
 {
     @InjectView(R.id.recyclerView)
     RecyclerView mRecyclerView;
