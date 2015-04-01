@@ -81,7 +81,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private String mLastLocationCityState;
     private boolean mUserRequestedRefresh = true;
     private boolean mHasLatestCityState = false;
-    private boolean mFirstLoad = true;
 
     protected void onCreate(Bundle savedInstanceState)
     {
