@@ -69,6 +69,7 @@ public class WeatherFragment extends Fragment
     @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
     @InjectView(R.id.iconImageView) ImageView mIconImageView;
     @InjectView(R.id.locationLabel) TextView mLocationLabel;
+    @InjectView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Forecast mForecast;
 
@@ -79,9 +80,36 @@ public class WeatherFragment extends Fragment
                 container, false);
         ButterKnife.inject(this, rootView);
 
+        mSwipeRefreshLayout.setOnRefreshListener(getRefreshListener());
+
         Log.d(TAG, "Main UI code is running!");
 
         return rootView;
+    }
+
+    private SwipeRefreshLayout.OnRefreshListener getRefreshListener()
+    {
+        return new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                Log.v(TAG, "Refresh swipe action");
+                ((MainActivity)getActivity()).getForecast();
+            }
+        };
+    }
+
+    public void toggleRefresh(boolean turnRefreshIndicatorOn)
+    {
+        if(turnRefreshIndicatorOn)
+        {
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
+        else
+        {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 
 

@@ -43,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -67,9 +68,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private boolean mHasLatestCityState = false;
     private boolean mAlertAboutGooglePlayServices = true;
 
-
-    @InjectView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -77,9 +75,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
-        mSwipeRefreshLayout.setOnRefreshListener(getRefreshListener());
 
-        toggleRefresh(true); //we do an update at the beginning by force so start the refresh indicator
+
+
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
@@ -120,7 +118,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     .setTabListener(this));
         }
 
-
+        toggleRefresh(true); //we do an update at the beginning by force so start the refresh indicator
 
         // Acquire a reference to the system Location Manager
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -145,19 +143,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         startLocationListener();
     }
 
-    private SwipeRefreshLayout.OnRefreshListener getRefreshListener()
-    {
-        return new SwipeRefreshLayout.OnRefreshListener()
-        {
-            @Override
-            public void onRefresh()
-            {
-                Log.v(TAG, "Refresh swipe action");
-                mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
-                getForecast(mLastLocation);
-            }
-        };
+    private void toggleRefresh(boolean refreshing) {
+        final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
+        if(weatherFragment != null) {
+            weatherFragment.toggleRefresh(refreshing);
+        }
     }
+
 
     private void startLocationListener()
     {
@@ -222,7 +214,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         return lastKnownLocation;
     }
-
+    public void getForecast()
+    {
+        mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
+        getForecast(mLastLocation);
+    }
     private void getForecast(Location location)
     {
         Log.v(TAG, "getForecast called");
@@ -301,6 +297,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                         {
                                             mUserRequestedRefresh = false; //we have completed a user requested refresh
                                         }
+
+                                        toggleRefresh(false);
                                     }
                                 });
                             }
@@ -363,18 +361,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         Log.v(TAG, "ApiKey value: " + apiKey);
 
         return apiKey;
-    }
-
-    private void toggleRefresh(boolean turnRefreshIndicatorOn)
-    {
-        if(turnRefreshIndicatorOn)
-        {
-            mSwipeRefreshLayout.setRefreshing(true);
-        }
-        else
-        {
-            mSwipeRefreshLayout.setRefreshing(false);
-        }
     }
 
 
