@@ -7,6 +7,21 @@
     tools:context="com.iksydk.stormy.ui.AutoWeatherFragment"
     android:background="@drawable/bg_gradient">
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

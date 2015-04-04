@@ -8,6 +8,7 @@ import com.iksydk.stormy.R;
 public class Forecast
 {
     private Current mCurrent;
+    private Day[] mDailyForecast;
     private Hour[] mHourlyForecast;
     private String mLocation;
 
@@ -40,8 +41,6 @@ public class Forecast
     {
         mCurrent = current;
     }
-
-    private Day[] mDailyForecast;
 
     public static int getIconId(String iconString)
     {

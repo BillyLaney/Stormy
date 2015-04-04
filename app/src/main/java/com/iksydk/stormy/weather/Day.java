@@ -15,6 +15,7 @@ public class Day implements Parcelable
     private long mTime;
     private String mSummary;
     private double mTemperatureMax;
+    private double mPrecipitationChance;
     private String mIcon;
     private String mTimezone;
 
@@ -126,4 +127,12 @@ public class Day implements Parcelable
             return new Day[size];
         }
     };
+
+    public double getPrecipitationChance() {
+        return mPrecipitationChance;
+    }
+
+    public void setPrecipitationChance(double mPrecipitationChance) {
+        this.mPrecipitationChance = mPrecipitationChance;
+    }
 }

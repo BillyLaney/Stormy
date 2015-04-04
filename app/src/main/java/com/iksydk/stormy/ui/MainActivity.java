@@ -9,12 +9,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,10 +43,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
@@ -280,6 +278,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             {
                                 Log.v(TAG, "We have the latest city, updating display");
                                 final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
+                                final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
+
                                 runOnUiThread(new Runnable()
                                 {
                                     @Override
@@ -293,6 +293,16 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                         {
                                             Log.v(TAG, "Unable to find fragment to update display");
                                         }
+
+                                        if(autoWeatherFragment != null)
+                                        {
+                                            autoWeatherFragment.updateDispaly(mForecast);
+                                        }
+                                        else
+                                        {
+                                            Log.v(TAG, "Unable to find auto fragment to update display");
+                                        }
+
                                         if(mUserRequestedRefresh)
                                         {
                                             mUserRequestedRefresh = false; //we have completed a user requested refresh
@@ -435,6 +445,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     mForecast.setLocation(mLastLocationCityState);
                     Log.v(TAG, "User requested update and we received a geocode response, updating display");
                     final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
+                    final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -446,6 +457,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             else
                             {
                                 Log.v(TAG, "Unable to find fragment to update display");
+                            }
+
+                            if(autoWeatherFragment != null)
+                            {
+                                autoWeatherFragment.updateDispaly(mForecast);
+                            }
+                            else
+                            {
+                                Log.v(TAG, "Unable to find auto fragment to update display");
                             }
                             if(mUserRequestedRefresh)
                             {
@@ -493,6 +513,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             day.setTemperatureMax(jsonDay.getDouble("temperatureMax"));
             day.setTime(jsonDay.getLong("time"));
             day.setTimezone(timezone);
+            day.setPrecipitationChance(jsonDay.getDouble("precipProbability"));
 
             days[i] = day;
         }
