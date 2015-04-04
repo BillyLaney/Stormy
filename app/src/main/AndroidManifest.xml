@@ -51,6 +51,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.AutoWeatherFragment"
+            android:label="@string/title_activity_auto_weather" >
+        </activity>
     </application>
 
 </manifest>

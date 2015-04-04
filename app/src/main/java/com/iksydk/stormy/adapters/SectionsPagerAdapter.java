@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.iksydk.stormy.R;
+import com.iksydk.stormy.ui.AutoWeatherFragment;
 import com.iksydk.stormy.ui.WeatherFragment;
 
 import java.util.Locale;
@@ -36,7 +37,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter
             case 0:
                 return new WeatherFragment();
             case 1:
-                return new WeatherFragment();
+                return new AutoWeatherFragment();
         }
 
         return null;
