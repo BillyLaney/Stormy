@@ -1,9 +1,9 @@
 package com.iksydk.stormy.ui;
 
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +22,18 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class AutoWeatherFragment extends Fragment {
+public class AutoWeatherFragment extends Fragment
+{
 
     private static final String TAG = AutoWeatherFragment.class.getSimpleName();
-    @InjectView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
-    @InjectView(android.R.id.list) ListView mListView;
+    @InjectView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    @InjectView(android.R.id.list)
+    ListView mListView;
 
-    @Override public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         View rootView = inflater.inflate(R.layout.fragment_auto_weather,
                 container, false);
         ButterKnife.inject(this, rootView);
@@ -46,14 +51,14 @@ public class AutoWeatherFragment extends Fragment {
             public void onRefresh()
             {
                 Log.v(TAG, "Refresh swipe action");
-                ((MainActivity)getActivity()).getForecast();
+                ((MainActivity) getActivity()).getForecast();
             }
         };
     }
 
     public void toggleRefresh(boolean turnRefreshIndicatorOn)
     {
-        if(turnRefreshIndicatorOn)
+        if (turnRefreshIndicatorOn)
         {
             mSwipeRefreshLayout.setRefreshing(true);
         }
@@ -63,7 +68,8 @@ public class AutoWeatherFragment extends Fragment {
         }
     }
 
-    public void updateDispaly(Forecast forecast) {
+    public void updateDispaly(Forecast forecast)
+    {
         double maxPrecipTarget = .5;
 
         List<AutoItem> autoItems = new ArrayList<>();
@@ -74,7 +80,7 @@ public class AutoWeatherFragment extends Fragment {
         Day startDay = days[0];
         double totalPrecip = 0;
 
-        for(int i = 0; i < days.length - 1; i++)
+        for (int i = 0; i < days.length - 1; i++)
         {
             Day today = days[i];
             Day tomorrow = days[i + 1];
@@ -84,10 +90,10 @@ public class AutoWeatherFragment extends Fragment {
 
             double precipToday = today.getPrecipitationChance();
             double precipTomorrow = tomorrow.getPrecipitationChance();
-            if( precipToday > maxPrecipTarget || precipTomorrow > maxPrecipTarget)
+            if (precipToday > maxPrecipTarget || precipTomorrow > maxPrecipTarget)
             {
                 Day[] daysArray = new Day[daysWashWillLast.size()];
-                for(int i2 = 0; i2 < daysArray.length; i2++)
+                for (int i2 = 0; i2 < daysArray.length; i2++)
                 {
                     daysArray[i2] = daysWashWillLast.get(i2);
                 }
@@ -102,7 +108,7 @@ public class AutoWeatherFragment extends Fragment {
 
 
         AutoItem[] autoItemsArray = new AutoItem[autoItems.size()];
-        for(int i = 0; i < autoItemsArray.length; i++)
+        for (int i = 0; i < autoItemsArray.length; i++)
         {
             autoItemsArray[i] = autoItems.get(i);
         }

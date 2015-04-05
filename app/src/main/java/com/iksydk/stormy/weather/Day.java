@@ -128,11 +128,13 @@ public class Day implements Parcelable
         }
     };
 
-    public double getPrecipitationChance() {
+    public double getPrecipitationChance()
+    {
         return mPrecipitationChance;
     }
 
-    public void setPrecipitationChance(double mPrecipitationChance) {
+    public void setPrecipitationChance(double mPrecipitationChance)
+    {
         this.mPrecipitationChance = mPrecipitationChance;
     }
 }

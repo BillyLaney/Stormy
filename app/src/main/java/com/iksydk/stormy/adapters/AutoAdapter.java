@@ -47,7 +47,7 @@ public class AutoAdapter extends BaseAdapter
     {
         ViewHolder holder;
 
-        if(convertView == null)
+        if (convertView == null)
         {
             //brand new, create everything
             convertView = LayoutInflater.from(mContext)
@@ -71,7 +71,7 @@ public class AutoAdapter extends BaseAdapter
         holder.averagePrecipValue.setText(item.getAveragePrecipValue() + "%");
         holder.dayCountLabel.setText(item.getDayCount() + "");
 
-        if(position == 0)
+        if (position == 0)
         {
             holder.dayNameLabel.setText("Today");
         }

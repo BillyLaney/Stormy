@@ -9,7 +9,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -74,9 +73,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         ButterKnife.inject(this);
 
 
-
-
-
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -104,7 +100,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 });
 
         // For each of the sections in the app, add a tab to the action bar.
-        for(int i = 0; i < mSectionsPagerAdapter.getCount(); i++)
+        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++)
         {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
@@ -112,7 +108,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             // this tab is selected.
             actionBar.addTab(actionBar.newTab()
                     .setText(mSectionsPagerAdapter.getPageTitle(i))
-                    //.setIcon(mSectionsPagerAdapter.getIcon(i))
+                            //.setIcon(mSectionsPagerAdapter.getIcon(i))
                     .setTabListener(this));
         }
 
@@ -124,7 +120,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         mLastLocation = getBestLastKnownLocation();
 
-        if(mLastLocation == null)
+        if (mLastLocation == null)
         {
             mLastLocation = new Location("MOCK");
             mLastLocation.setLongitude(-122.423);
@@ -141,9 +137,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         startLocationListener();
     }
 
-    private void toggleRefresh(boolean refreshing) {
-        final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
-        if(weatherFragment != null) {
+    private void toggleRefresh(boolean refreshing)
+    {
+        final WeatherFragment weatherFragment = (WeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(0);
+        if (weatherFragment != null)
+        {
             weatherFragment.toggleRefresh(refreshing);
         }
     }
@@ -158,13 +156,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             {
                 // Called when a new location is found by the location provider.
                 Log.v(TAG, "Location returned: " + location.getProvider());
-                if(isBetterLocation(location, mLastLocation))
+                if (isBetterLocation(location, mLastLocation))
                 {
                     Log.v(TAG, "Location returned is better location");
 
                     mLastLocation = location;
                     mHasLatestCityState = false; //reset the city state as we have a new location
-                    if(mUserRequestedRefresh)
+                    if (mUserRequestedRefresh)
                     {
                         //only if it just happens to be that the user has requested a refresh
                         // and we have a better location now we should start the reverse geocoding service
@@ -192,11 +190,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // Register the listener with the Location Manager to receive location updates
         //Call twice to receive updates from both NETWORK (cell network and wifi) and GPS
-        if(mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+        if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_UPDATES_SLOW, LOCATION_UPDATES_MINIMUM_DISTANCE, locationListener); //Cell network based location (android.permission.ACCESS_COARSE_LOCATION)
         }
-        if(mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
         {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_UPDATES_SLOW, LOCATION_UPDATES_MINIMUM_DISTANCE, locationListener); //GPS based location (android.permission.ACCESS_FINE_LOCATION)
         }
@@ -205,18 +203,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private Location getBestLastKnownLocation()
     {
         Location lastKnownLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(lastKnownLocation == null) //GPS not available
+        if (lastKnownLocation == null) //GPS not available
         {
             lastKnownLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
 
         return lastKnownLocation;
     }
+
     public void getForecast()
     {
         mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
         getForecast(mLastLocation);
     }
+
     private void getForecast(Location location)
     {
         Log.v(TAG, "getForecast called");
@@ -224,7 +224,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey + "/" + location.getLatitude() + "," + location.getLongitude();
 
-        if(isNetworkAvailable())
+        if (isNetworkAvailable())
         {
             OkHttpClient client = new OkHttpClient();
 
@@ -259,11 +259,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                 .string();
                         Log.v(TAG, jsonData);
 
-                        if(response.isSuccessful())
+                        if (response.isSuccessful())
                         {
                             mForecast = parseForecastDetails(jsonData);
 
-                            if(!mHasLatestCityState)
+                            if (!mHasLatestCityState)
                             {
                                 //if we get here it means that we received new location details between the last refresh
                                 startReverseGeocodeIntentService();
@@ -274,18 +274,18 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             }
                             //We only update the display once we have a city and state to go with it.
                             //this will prevent updating the temp but not the city together
-                            if(mHasLatestCityState)
+                            if (mHasLatestCityState)
                             {
                                 Log.v(TAG, "We have the latest city, updating display");
-                                final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
-                                final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
+                                final WeatherFragment weatherFragment = (WeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(0);
+                                final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(1);
 
                                 runOnUiThread(new Runnable()
                                 {
                                     @Override
                                     public void run()
                                     {
-                                        if(weatherFragment != null)
+                                        if (weatherFragment != null)
                                         {
                                             weatherFragment.updateDisplay(mForecast);
                                         }
@@ -294,7 +294,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                             Log.v(TAG, "Unable to find fragment to update display");
                                         }
 
-                                        if(autoWeatherFragment != null)
+                                        if (autoWeatherFragment != null)
                                         {
                                             autoWeatherFragment.updateDispaly(mForecast);
                                         }
@@ -303,7 +303,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                             Log.v(TAG, "Unable to find auto fragment to update display");
                                         }
 
-                                        if(mUserRequestedRefresh)
+                                        if (mUserRequestedRefresh)
                                         {
                                             mUserRequestedRefresh = false; //we have completed a user requested refresh
                                         }
@@ -333,7 +333,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             alertUserAboutError();
                         }
                     }
-                    catch(IOException | JSONException e)
+                    catch (IOException | JSONException e)
                     {
                         Log.e(TAG, "Exception caught: ", e);
                     }
@@ -353,7 +353,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     {
         String apiKey;
 
-        if(getApplicationContext()
+        if (getApplicationContext()
                 .getResources()
                 .getIdentifier("protected_forecast_io_api_key", "string", getPackageName()) == 0)
         {
@@ -391,7 +391,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if(id == R.id.action_settings)
+        if (id == R.id.action_settings)
         {
             return true;
         }
@@ -399,17 +399,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         return super.onOptionsItemSelected(item);
     }
 
-    @Override public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
     {
         mViewPager.setCurrentItem(tab.getPosition());
     }
 
-    @Override public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
     {
 
     }
 
-    @Override public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft)
     {
 
     }
@@ -433,24 +436,26 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             //displayAddressOutput();
 
             // Show a toast message if an address was found.
-            if(resultCode == Constants.SUCCESS_RESULT)
+            if (resultCode == Constants.SUCCESS_RESULT)
             {
                 Log.v(TAG, "AddressResultReceiver reverse geocoded successfully");
                 mLastLocationCityState = result;
                 mHasLatestCityState = true; //update saying for the latest gps we have the updated the latest city state
 
                 //this method gets called each time we get better gps, but we only want to update the forecast and UI if the user requested a new forecast
-                if(mUserRequestedRefresh && mForecast != null)
+                if (mUserRequestedRefresh && mForecast != null)
                 {
                     mForecast.setLocation(mLastLocationCityState);
                     Log.v(TAG, "User requested update and we received a geocode response, updating display");
-                    final WeatherFragment weatherFragment = (WeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
-                    final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
-                    runOnUiThread(new Runnable() {
+                    final WeatherFragment weatherFragment = (WeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(0);
+                    final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(1);
+                    runOnUiThread(new Runnable()
+                    {
                         @Override
-                        public void run() {
+                        public void run()
+                        {
 
-                            if(weatherFragment != null)
+                            if (weatherFragment != null)
                             {
                                 weatherFragment.updateDisplay(mForecast);
                             }
@@ -459,7 +464,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                                 Log.v(TAG, "Unable to find fragment to update display");
                             }
 
-                            if(autoWeatherFragment != null)
+                            if (autoWeatherFragment != null)
                             {
                                 autoWeatherFragment.updateDispaly(mForecast);
                             }
@@ -467,7 +472,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             {
                                 Log.v(TAG, "Unable to find auto fragment to update display");
                             }
-                            if(mUserRequestedRefresh)
+                            if (mUserRequestedRefresh)
                             {
                                 mUserRequestedRefresh = false; //we have completed a user requested refresh
                             }
@@ -503,7 +508,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         Day[] days = new Day[data.length()];
 
-        for(int i = 0; i < data.length(); i++)
+        for (int i = 0; i < data.length(); i++)
         {
             JSONObject jsonDay = data.getJSONObject(i);
             Day day = new Day();
@@ -531,7 +536,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         Hour[] hours = new Hour[data.length()];
 
-        for(int i = 0; i < data.length(); i++)
+        for (int i = 0; i < data.length(); i++)
         {
             Hour hour = new Hour();
 
@@ -578,7 +583,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         boolean isAvailable = false;
 
-        if(networkInfo != null && networkInfo.isConnected())
+        if (networkInfo != null && networkInfo.isConnected())
         {
             isAvailable = true;
         }
@@ -595,10 +600,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Override
     public void onConnected(Bundle bundle)
     {
-        if(mLastLocation != null)
+        if (mLastLocation != null)
         {
             // Determine whether a Geocoder is available.
-            if(!Geocoder.isPresent())
+            if (!Geocoder.isPresent())
             {
                 Toast.makeText(this, R.string.no_geocoder_available, Toast.LENGTH_LONG)
                         .show();
@@ -622,12 +627,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // onConnectionFailed.
         int errorCode = connectionResult.getErrorCode();
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + errorCode);
-        switch(errorCode)
+        switch (errorCode)
         {
             case ConnectionResult.SERVICE_MISSING:
             case ConnectionResult.SERVICE_DISABLED:
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                if(mAlertAboutGooglePlayServices)
+                if (mAlertAboutGooglePlayServices)
                 {
                     GooglePlayServicesUtil.getErrorDialog(errorCode, this, 1)
                             .show();
@@ -652,7 +657,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public void onStop()
     {
         super.onStop();
-        if(mGoogleApiClient.isConnected())
+        if (mGoogleApiClient.isConnected())
         {
             mGoogleApiClient.disconnect();
         }
@@ -664,7 +669,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // Create an intent for passing to the intent service responsible for fetching the address.
         Intent intent = new Intent(this, FetchAddressIntentService.class);
 
-        if(mResultReceiver == null)
+        if (mResultReceiver == null)
         {
             //declare a new results receiver
             mResultReceiver = new AddressResultReceiver(new Handler());
@@ -692,13 +697,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation)
     {
-        if(currentBestLocation == null)
+        if (currentBestLocation == null)
         {
             // A new location is always better than no location
             return true;
         }
 
-        if(location == null)
+        if (location == null)
         {
             //we have no location so it's not better it's total crap
             return false;
@@ -706,7 +711,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // Check whether the location is the geographically the same, this is not better
         // probably only happens in debug mode anyway but WHAT! EVER!
-        if(currentBestLocation.getLatitude() == location.getLatitude()
+        if (currentBestLocation.getLatitude() == location.getLatitude()
                 && currentBestLocation.getLongitude() == location.getLongitude())
         {
             return false;
@@ -720,12 +725,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // If it's been more than two minutes since the current location, use the new location
         // because the user has likely moved
-        if(isSignificantlyNewer)
+        if (isSignificantlyNewer)
         {
             return true;
             // If the new location is more than two minutes older, it must be worse
         }
-        else if(isSignificantlyOlder)
+        else if (isSignificantlyOlder)
         {
             return false;
         }
@@ -741,15 +746,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 currentBestLocation.getProvider());
 
         // Determine location quality using a combination of timeliness and accuracy
-        if(isMoreAccurate)
+        if (isMoreAccurate)
         {
             return true;
         }
-        else if(isNewer && !isLessAccurate)
+        else if (isNewer && !isLessAccurate)
         {
             return true;
         }
-        else if(isNewer && !isSignificantlyLessAccurate && isFromSameProvider)
+        else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider)
         {
             return true;
         }
@@ -761,7 +766,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
      */
     private boolean isSameProvider(String provider1, String provider2)
     {
-        if(provider1 == null)
+        if (provider1 == null)
         {
             return provider2 == null;
         }

@@ -30,19 +30,28 @@ public class WeatherFragment extends Fragment
     public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
     public static final String CURRENT_LOCATION = "CURRENT_LOCATION";
 
-    @InjectView(R.id.timeLabel) TextView mTimeLabel;
-    @InjectView(R.id.temperatureLabel) TextView mTemperatureLabel;
-    @InjectView(R.id.humidityValue) TextView mHumidityValue;
-    @InjectView(R.id.averagePrecipValue) TextView mPrecipValue;
-    @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
-    @InjectView(R.id.iconImageView) ImageView mIconImageView;
-    @InjectView(R.id.locationLabel) TextView mLocationLabel;
-    @InjectView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @InjectView(R.id.timeLabel)
+    TextView mTimeLabel;
+    @InjectView(R.id.temperatureLabel)
+    TextView mTemperatureLabel;
+    @InjectView(R.id.humidityValue)
+    TextView mHumidityValue;
+    @InjectView(R.id.averagePrecipValue)
+    TextView mPrecipValue;
+    @InjectView(R.id.summaryLabel)
+    TextView mSummaryLabel;
+    @InjectView(R.id.iconImageView)
+    ImageView mIconImageView;
+    @InjectView(R.id.locationLabel)
+    TextView mLocationLabel;
+    @InjectView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Forecast mForecast;
 
 
-    @Override public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_weather,
                 container, false);
@@ -63,14 +72,14 @@ public class WeatherFragment extends Fragment
             public void onRefresh()
             {
                 Log.v(TAG, "Refresh swipe action");
-                ((MainActivity)getActivity()).getForecast();
+                ((MainActivity) getActivity()).getForecast();
             }
         };
     }
 
     public void toggleRefresh(boolean turnRefreshIndicatorOn)
     {
-        if(turnRefreshIndicatorOn)
+        if (turnRefreshIndicatorOn)
         {
             mSwipeRefreshLayout.setRefreshing(true);
         }
@@ -79,7 +88,6 @@ public class WeatherFragment extends Fragment
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
-
 
 
     public void updateDisplay(Forecast forecast)
@@ -99,7 +107,6 @@ public class WeatherFragment extends Fragment
         Drawable drawable = getResources().getDrawable(current.getIconId());
         mIconImageView.setImageDrawable(drawable);
     }
-
 
 
     @OnClick(R.id.dailyButton)
@@ -122,8 +129,6 @@ public class WeatherFragment extends Fragment
 
         startActivity(intent);
     }
-
-
 
 
 }

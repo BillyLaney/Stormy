@@ -21,9 +21,12 @@ import butterknife.InjectView;
 
 public class DailyForecastActivity extends Activity
 {
-    @InjectView(android.R.id.list) ListView mListView;
-    @InjectView(android.R.id.empty) TextView mEmptyTextView;
-    @InjectView(R.id.locationLabel) TextView mLocationLabel;
+    @InjectView(android.R.id.list)
+    ListView mListView;
+    @InjectView(android.R.id.empty)
+    TextView mEmptyTextView;
+    @InjectView(R.id.locationLabel)
+    TextView mLocationLabel;
     private Day[] mDays;
     private String mLocation;
 

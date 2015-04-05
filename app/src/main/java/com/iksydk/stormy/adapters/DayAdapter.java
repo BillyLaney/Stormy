@@ -48,7 +48,7 @@ public class DayAdapter extends BaseAdapter
     {
         ViewHolder holder;
 
-        if(convertView == null)
+        if (convertView == null)
         {
             //brand new, create everything
             convertView = LayoutInflater.from(mContext)
@@ -71,7 +71,7 @@ public class DayAdapter extends BaseAdapter
         holder.iconImageView.setImageResource(day.getIconId());
         holder.temperatureLabel.setText(day.getTemperatureMax() + "");
 
-        if(position == 0)
+        if (position == 0)
         {
             holder.dayLabel.setText("Today");
         }
