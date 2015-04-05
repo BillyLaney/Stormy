@@ -1,7 +1,9 @@
 package com.iksydk.stormy.ui;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Geocoder;
 import android.location.Location;
@@ -15,8 +17,12 @@ import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -390,13 +396,73 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
+        switch(id)
         {
-            return true;
+            case R.id.action_set_location:
+                ShowSetLocationWindow();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void ShowSetLocationWindow()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // Get the layout inflater
+        LayoutInflater inflater = getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        builder.setView(inflater.inflate(R.layout.dialog_get_location, null))
+                // Add action buttons
+                .setPositiveButton(getString(R.string.set), null)
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("Use Current", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+
+                    }
+                });
+
+
+        final AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener()
+        {
+            @Override
+            public void onShow(DialogInterface dialogInterface)
+            {
+                Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // sign in the user ...
+                        EditText zipcodeEditText = (EditText)dialog.findViewById(R.id.zipcodeEditText);
+                        if(zipcodeEditText.getText().length() < 5)
+                        {
+                            zipcodeEditText.setError("Zipcode should be 5 digits");
+                        }
+                        else
+                        {
+                            SetStaticLocation(zipcodeEditText.getText().toString());
+                            dialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
+        dialog.show();
+    }
+
+    private void SetStaticLocation(String zipcode)
+    {
+        Toast.makeText(this, zipcode, Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -24,4 +24,6 @@
     <string name="title_section2">Auto</string>
     <string name="title_section3">Section 3</string>
     <string name="title_activity_auto_weather">AutoWeatherActivity</string>
+    <string name="cancel">Cancel</string>
+    <string name="set">Set</string>
 </resources>
