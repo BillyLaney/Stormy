@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -70,6 +71,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private boolean mUserRequestedRefresh = true;
     private boolean mHasLatestCityState = false;
     private boolean mAlertAboutGooglePlayServices = true;
+    private boolean mUseStaticLocation = false;
+    private String mStaticZipcode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -123,20 +126,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // Acquire a reference to the system Location Manager
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-
-        mLastLocation = getBestLastKnownLocation();
-
-        if (mLastLocation == null)
-        {
-            mLastLocation = new Location("MOCK");
-            mLastLocation.setLongitude(-122.423);
-            mLastLocation.setLatitude(37.8267);
-
-            mLastLocationCityState = "Alcatraz Island CA, US";
-            mHasLatestCityState = true;
-        }
-
-        getForecast(mLastLocation);
+        getForecast();
 
         buildGoogleApiClient();
 
@@ -146,9 +136,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private void toggleRefresh(boolean refreshing)
     {
         final WeatherFragment weatherFragment = (WeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(0);
+        final AutoWeatherFragment autoWeatherFragment = (AutoWeatherFragment) mSectionsPagerAdapter.getRegisteredFragment(1);
         if (weatherFragment != null)
         {
             weatherFragment.toggleRefresh(refreshing);
+        }
+        if(autoWeatherFragment != null)
+        {
+            autoWeatherFragment.toggleRefresh(refreshing);
         }
     }
 
@@ -220,6 +215,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public void getForecast()
     {
         mUserRequestedRefresh = true; //indicator that the user has requested this update, meaning we should use data for reverse geocoding the next gps
+
+        mLastLocation = getBestLastKnownLocation();
+
+        if (mLastLocation == null)
+        {
+            mLastLocation = new Location("MOCK");
+            mLastLocation.setLongitude(-122.423);
+            mLastLocation.setLatitude(37.8267);
+
+            mLastLocationCityState = "Alcatraz Island CA, US";
+            mHasLatestCityState = true;
+        }
+
+        mLastLocation = getBestLastKnownLocation();
         getForecast(mLastLocation);
     }
 
@@ -427,7 +436,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-
+                        SetUseCurrentLocation();
                     }
                 });
 
@@ -460,9 +469,22 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         dialog.show();
     }
 
+    private void SetUseCurrentLocation()
+    {
+        mUseStaticLocation = false;
+        mUserRequestedRefresh = true;
+        mHasLatestCityState = false;
+        toggleRefresh(true);
+        getForecast();
+    }
+
     private void SetStaticLocation(String zipcode)
     {
-        Toast.makeText(this, zipcode, Toast.LENGTH_LONG).show();
+        mUseStaticLocation = true;
+        mStaticZipcode = zipcode;
+        mUserRequestedRefresh = true;
+        toggleRefresh(true);
+        startReverseGeocodeIntentService();
     }
 
     @Override
@@ -499,15 +521,24 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             Log.v(TAG, "AddressResultReceiver receive results");
             // Display the address string or an error message sent from the intent service.
             String result = resultData.getString(Constants.RESULT_DATA_KEY);
+            String[] results = TextUtils.split(result, System.getProperty("line.separator"));
+
             //displayAddressOutput();
 
             // Show a toast message if an address was found.
             if (resultCode == Constants.SUCCESS_RESULT)
             {
                 Log.v(TAG, "AddressResultReceiver reverse geocoded successfully");
-                mLastLocationCityState = result;
+                mLastLocationCityState = results[0];
                 mHasLatestCityState = true; //update saying for the latest gps we have the updated the latest city state
 
+                if(mUseStaticLocation)
+                {
+                    mLastLocation.setLongitude(Double.parseDouble(results[1]));
+                    mLastLocation.setLongitude(Double.parseDouble(results[2]));
+                    getForecast(mLastLocation);
+                }
+                else
                 //this method gets called each time we get better gps, but we only want to update the forecast and UI if the user requested a new forecast
                 if (mUserRequestedRefresh && mForecast != null)
                 {
@@ -544,6 +575,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             }
                         }
                     });
+
+                    toggleRefresh(false);
                 }
             }
             else
@@ -744,7 +777,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
 
         // Pass the location data as an extra to the service.
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        if(!mUseStaticLocation)
+        {
+            intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        }
+        else
+        {
+            intent.putExtra(Constants.ZIPCODE_DATA_EXTRA, mStaticZipcode);
+        }
 
         // Start the service. If the service isn't already running, it is instantiated and started
         // (creating a process for it if needed); if it is running then it remains running. The
