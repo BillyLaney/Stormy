@@ -228,7 +228,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             mHasLatestCityState = true;
         }
 
-        mLastLocation = getBestLastKnownLocation();
         getForecast(mLastLocation);
     }
 
