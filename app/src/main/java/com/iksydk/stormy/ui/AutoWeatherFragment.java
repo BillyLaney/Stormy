@@ -72,32 +72,31 @@ public class AutoWeatherFragment extends Fragment {
         Day[] days = forecast.getDailyForecast();
 
         Day startDay = days[0];
-        daysWashWillLast.add(days[0]);
-        double totalPrecip = days[0].getPrecipitationChance();
+        double totalPrecip = 0;
 
-        for(Day d : days)
+        for(int i = 0; i < days.length - 1; i++)
         {
-            if(d == startDay)
-                continue; //skip day 1
-            if(d.getPrecipitationChance() > maxPrecipTarget)
+            Day today = days[i];
+            Day tomorrow = days[i + 1];
+
+            totalPrecip += today.getPrecipitationChance();
+            daysWashWillLast.add(today);
+
+            double precipToday = today.getPrecipitationChance();
+            double precipTomorrow = tomorrow.getPrecipitationChance();
+            if( precipToday > maxPrecipTarget || precipTomorrow > maxPrecipTarget)
             {
                 Day[] daysArray = new Day[daysWashWillLast.size()];
-                for(int i = 0; i < daysArray.length; i++)
+                for(int i2 = 0; i2 < daysArray.length; i2++)
                 {
-                    daysArray[i] = daysWashWillLast.get(i);
+                    daysArray[i2] = daysWashWillLast.get(i2);
                 }
                 //this will start a new series
                 autoItems.add(new AutoItem(totalPrecip / daysWashWillLast.size(), startDay, daysArray));
 
-                startDay = d;
                 daysWashWillLast.clear();
-                daysWashWillLast.add(d);
-                totalPrecip = d.getPrecipitationChance();
-            }
-            else
-            {
-                totalPrecip += d.getPrecipitationChance();
-                daysWashWillLast.add(d);
+                startDay = tomorrow;
+                totalPrecip = 0;
             }
         }
 

@@ -16,7 +16,7 @@ public class AutoItem {
     }
 
     public double getPrecipValue() {
-        return mPrecipValue;
+        return Math.round(mPrecipValue * 100) / 100.0;
     }
 
     public int getDayCount() {
