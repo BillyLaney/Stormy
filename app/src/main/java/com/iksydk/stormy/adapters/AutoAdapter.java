@@ -5,12 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.iksydk.stormy.R;
 import com.iksydk.stormy.weather.AutoItem;
-import com.iksydk.stormy.weather.Day;
 
 /**
  * Created by Billy on 3/21/2015.
@@ -59,7 +57,7 @@ public class AutoAdapter extends BaseAdapter
 
             holder.dayCountLabel = (TextView) convertView.findViewById(R.id.dayCountLabel);
             holder.dayNameLabel = (TextView) convertView.findViewById(R.id.dayNameLabel);
-            holder.precipValue = (TextView) convertView.findViewById(R.id.precipValue);
+            holder.averagePrecipValue = (TextView) convertView.findViewById(R.id.averagePrecipValue);
 
             convertView.setTag(holder);
         }
@@ -70,7 +68,7 @@ public class AutoAdapter extends BaseAdapter
 
         AutoItem item = mItems[position];
 
-        holder.precipValue.setText(item.getPrecipValue() + "");
+        holder.averagePrecipValue.setText(item.getAveragePrecipValue() + "%");
         holder.dayCountLabel.setText(item.getDayCount() + "");
 
         if(position == 0)
@@ -88,7 +86,7 @@ public class AutoAdapter extends BaseAdapter
     private static class ViewHolder
     {
         TextView dayCountLabel;
-        TextView precipValue;
+        TextView averagePrecipValue;
         TextView dayNameLabel;
     }
 }
